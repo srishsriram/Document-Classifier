@@ -115,9 +115,7 @@ Example (partial):
 
 ## License
 
-No license specified. Assume personal or academic use only. Add a LICENSE file for clarity.
-
----
+Personal or academic use only.
 
 ## Author
 
