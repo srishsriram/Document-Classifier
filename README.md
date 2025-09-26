@@ -1,4 +1,3 @@
-````markdown
 # Document Classifier
 
 This is a basic Java-based machine learning project designed to classify technical documents using a preprocessed `.arff` dataset format (used by Weka). The project was developed in Eclipse and includes source code, compiled classes, and sample data.
@@ -113,17 +112,6 @@ Example (partial):
 @DATA
 100,yes,technical
 ```
-
----
-
-## TODO
-
-- [ ] Add README (this file)
-- [ ] Include sample output/logs
-- [ ] Document classifier parameters
-- [ ] Provide test cases
-
----
 
 ## License
 
