@@ -1,7 +1,5 @@
 # Document-Classifier
 
-**Status**: Work-in-Progress  
-**Language**: Java  
 **Goal**: Train and evaluate classic ML text classifiers (e.g., Naive Bayes, SVM) using Weka and libsvm on ARFF-formatted data.
 
 ---
