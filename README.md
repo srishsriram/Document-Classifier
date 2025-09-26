@@ -1,122 +1,161 @@
-# Document Classifier
+# Document-Classifier
 
-This is a basic Java-based machine learning project designed to classify technical documents using a preprocessed `.arff` dataset format (used by Weka). The project was developed in Eclipse and includes source code, compiled classes, and sample data.
+**Status**: Work-in-Progress  
+**Language**: Java  
+**Goal**: Train and evaluate classic ML text classifiers (e.g., Naive Bayes, SVM) using Weka and libsvm on ARFF-formatted data.
+
+---
+
+## Features
+- ARFF-driven dataset input (`arff.arff`).
+- Uses Weka filters and classifiers, plus libsvm.
+- CLI-friendly main program (`Categorization.java`).
+- Eclipse project files included.
 
 ---
 
 ## Project Structure
-
 ```
-Document-Classifier/
+Document-Classifier-master/
 ├── .classpath
 ├── .project
+├── .settings/
+│   └── org.eclipse.jdt.core.prefs
+├── README.md
 ├── arff.arff
 ├── bin/
-│   └── classifier/
-│       └── DocumentClassifier.class
-├── src/
-│   └── classifier/
-│       └── DocumentClassifier.java
-└── .settings/
-    └── org.eclipse.jdt.core.prefs
+│   └── Categorization.class
+└── src/
+    └── Categorization.java
 ```
 
-- `src/classifier/DocumentClassifier.java` – Main source file. Loads `.arff` file and applies classification using Weka.
-- `arff.arff` – Dataset in Weka's ARFF format (Attribute-Relation File Format).
-- `bin/` – Eclipse auto-generated compiled `.class` files.
-- `.classpath`, `.project`, `.settings/` – Eclipse metadata.
+---
+
+## Dependencies
+- Java 8+ (OpenJDK or Oracle JDK).
+- [Weka](https://www.cs.waikato.ac.nz/ml/weka/) JARs on classpath.
+- [libsvm](https://www.csie.ntu.edu.tw/~cjlin/libsvm/) JAR on classpath.
+
+> Ensure `weka.jar` and `libsvm.jar` paths are available locally.
 
 ---
 
-## Prerequisites
+## Build
 
-- Java 8 or higher
-- [Weka](https://www.cs.waikato.ac.nz/ml/weka/) (Weka JAR file, e.g., `weka-stable.jar`)
-- Optional: Eclipse IDE (for easier navigation)
-
----
-
-## Setup Instructions
-
-### 1. Clone the Repository
-
+### With `javac`
 ```bash
-git clone https://github.com/srishsriram/Document-Classifier.git
-cd Document-Classifier
+# Paths to your jars
+WEKA_JAR=/path/to/weka.jar
+LIBSVM_JAR=/path/to/libsvm.jar
+
+# From project root
+javac -cp "$WEKA_JAR:$LIBSVM_JAR:." -d bin src/Categorization.java
 ```
 
-### 2. Add Weka to Classpath
-
-Download `weka-stable.jar` and place it in the project root or a `lib/` folder.
-
-If compiling manually:
-
-```bash
-javac -cp weka-stable.jar src/classifier/DocumentClassifier.java -d bin
-```
-
-If running manually:
-
-```bash
-java -cp "bin:weka-stable.jar" classifier.DocumentClassifier
-```
-
-Use `;` instead of `:` on Windows for classpath separation.
+### With Eclipse
+- Import → Existing Projects into Workspace → select `Document-Classifier-master`.
+- Add Weka and libsvm JARs to Project Properties → Java Build Path → Libraries.
 
 ---
 
-## Sample `Main` Method Behavior
+## Run
+```bash
+# Example: classify using the bundled ARFF
+java -cp "bin:$WEKA_JAR:$LIBSVM_JAR:." Categorization \
+  --train arff.arff \
+  --test  arff.arff \
+  --algo  naive_bayes
+```
 
-This is the expected flow (based on `DocumentClassifier.java`):
-
-1. Load dataset from `arff.arff`
-2. Initialize classifier (e.g., NaiveBayes or J48)
-3. Train classifier on dataset
-4. Evaluate model using cross-validation
-5. Output summary statistics
+> Flags may vary. If no CLI parsing exists, edit constants in `Categorization.java` or modify the code to accept arguments.
 
 ---
 
-## Sample Code Snippet
+## Data Format (ARFF)
+The sample `arff.arff` defines free-text and a nominal class. Example excerpt:
+```arff
+@relation test
 
+@attribute text string
+@attribute @class@ {faq,forum,kb,manual,news}
+
+@data
+"How do I perform a live vMotion of a Delphix Engine?", faq
+"Does the scheduler support cron expressions?", kb
+```
+- `text`: free-form string feature.
+- `@class@`: target label; update the label set for your use case.
+
+---
+
+## Core Class
+
+### `src/Categorization.java`
+- Imports Weka core, filters, and classifiers; imports libsvm.
+- Contains a `public static void main(...)` entrypoint.
+- Reads ARFF paths, builds features, trains, and evaluates a model.
+- Example detected constructs:
+  - Uses Weka classifiers such as `NaiveBayes`.
+  - Applies Weka filters (`weka.filters.*`) for preprocessing.
+  - Integrates `libsvm` for SVM models.
+
+Excerpt:
 ```java
-Instances data = new Instances(new BufferedReader(new FileReader("arff.arff")));
-data.setClassIndex(data.numAttributes() - 1);
-
-Classifier classifier = new J48(); // Can switch to NaiveBayes, etc.
-classifier.buildClassifier(data);
-
-Evaluation eval = new Evaluation(data);
-eval.crossValidateModel(classifier, data, 10, new Random(1));
-
-System.out.println(eval.toSummaryString());
+import weka.core.*;
+import libsvm.*;
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.classifiers.*;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.filters.*;
+// ...
+public class Categorization {
+    public static void main(String[] args) throws Exception {
+        // load ARFF, build classifier, evaluate
+        // e.g., DataSource source = new DataSource(trainPath);
+        // Instances train = source.getDataSet();
+        // train.setClassIndex(train.numAttributes() - 1);
+        // Classifier cls = new NaiveBayes();
+        // cls.buildClassifier(train);
+        // ...
+    }
+}
 ```
 
 ---
 
-## ARFF File
+## Typical Pipeline
+1. Load ARFF train and test sets.
+2. Set class index to last attribute.
+3. Optionally apply filters (e.g., `StringToWordVector` for text).
+4. Train a classifier (Naive Bayes, SVM via libsvm).
+5. Evaluate on test set (accuracy, precision/recall, confusion matrix).
 
-The `arff.arff` file must define:
+---
 
-- A set of attributes (numeric, nominal, string)
-- A target attribute (last column) to classify
-- A dataset section (`@data`) with matching rows
+## Extending
+- Replace Naive Bayes with other Weka classifiers (`J48`, `Logistic`, `SMO`).
+- Add `StringToWordVector` with TF-IDF, n-grams, stopwords.
+- Save and reload models with Weka Serialization.
+- Add CLI options with a parser (e.g., args4j or simple custom parsing).
 
-Example (partial):
+---
 
+## Notes and Gaps
+- No build tool files (Maven/Gradle). Add one for reproducibility.
+- No explicit CLI help or flags documented in code. Consider adding.
+- No tests included. Add unit tests and small ARFF fixtures.
+- Ensure jar versions of Weka and libsvm match the imports used.
+
+---
+
+## Quick Start
+```bash
+# 1) Prepare data
+cp your_dataset.arff arff.arff
+
+# 2) Compile
+javac -cp "$WEKA_JAR:$LIBSVM_JAR:." -d bin src/Categorization.java
+
+# 3) Run
+java -cp "bin:$WEKA_JAR:$LIBSVM_JAR:." Categorization
 ```
-@RELATION docs
-@ATTRIBUTE length NUMERIC
-@ATTRIBUTE has_code {yes,no}
-@ATTRIBUTE class {technical,nontechnical}
-@DATA
-100,yes,technical
-```
-
-## License
-
-Personal or academic use only.
-
-## Author
-
-Srish Sriram – [github.com/srishsriram](https://github.com/srishsriram)
